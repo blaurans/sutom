@@ -58,6 +58,19 @@ main {
   margin: 0;
 }
 
+.choix-jour {
+  text-align: center;
+  margin-bottom: 0;
+}
+
+select {
+  padding: 0.3rem;
+  border-radius: 6px;
+  background: var(--carte);
+  color: var(--texte);
+  border: 1px solid var(--absent);
+}
+
 #info {
   color: var(--discret);
   text-align: center;

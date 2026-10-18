@@ -3,8 +3,11 @@ const ORDRE = { absent: 0, present: 1, correct: 2 };
 
 let etat = null;
 let saisie = '';
+let jourAffiche = null;
 
 const $ = (id) => document.getElementById(id);
+
+const LIBELLES_STATUT = { en_cours: 'en cours', gagnee: 'gagné', perdue: 'perdu' };
 
 function normaliserLettre(touche) {
   return touche.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase().replace(/[^a-z]/g, '');
@@ -140,11 +143,14 @@ async function soumettre() {
   try {
     etat = await appeler('/api/essai', {
       method: 'POST',
-      body: JSON.stringify({ mot: etat.premiereLettre + saisie }),
+      body: JSON.stringify({ jour: etat.jour, mot: etat.premiereLettre + saisie }),
     });
     saisie = '';
     rendreEtat();
-    if (etat.statut !== 'en_cours') chargerClassement();
+    if (etat.statut !== 'en_cours') {
+      chargerClassement();
+      chargerChoixJour();
+    }
   } catch (erreur) {
     afficherMessage(erreur.message, 'erreur');
   }
@@ -186,6 +192,28 @@ async function chargerClassement() {
   $('classement').hidden = false;
 }
 
+async function chargerChoixJour() {
+  const { aujourdhui, jours } = await appeler('/api/jours');
+  const choix = $('choix-jour');
+  choix.innerHTML = '';
+  for (const { jour, statut } of jours) {
+    const option = document.createElement('option');
+    option.value = jour;
+    const suffixe = statut ? LIBELLES_STATUT[statut] : 'à jouer';
+    option.textContent = `${jour}${jour === aujourdhui ? ' (aujourd\'hui)' : ''} · ${suffixe}`;
+    choix.appendChild(option);
+  }
+  choix.value = jourAffiche || aujourdhui;
+  return aujourdhui;
+}
+
+async function changerJour(jour) {
+  saisie = '';
+  jourAffiche = jour;
+  etat = await appeler(`/api/partie?jour=${encodeURIComponent(jour)}`);
+  rendreEtat();
+}
+
 async function demarrer() {
   let session;
   try {
@@ -197,12 +225,13 @@ async function demarrer() {
 
   $('nom').textContent = session.nom;
   $('compte').hidden = false;
-  etat = await appeler('/api/partie');
   $('jeu').hidden = false;
-  rendreEtat();
+  const aujourdhui = await chargerChoixJour();
+  await changerJour(aujourdhui);
   chargerClassement();
 }
 
+$('choix-jour').addEventListener('change', (evenement) => changerJour(evenement.target.value));
 $('tout-effacer').addEventListener('click', toutEffacer);
 
 demarrer().catch((erreur) => afficherMessage(erreur.message, 'erreur'));

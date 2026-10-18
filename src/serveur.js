@@ -5,6 +5,7 @@ import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { DatabaseSync } from 'node:sqlite';
 import {
+  DATE_DEBUT,
   ESSAIS_MAX,
   indexJour,
   jourParis,
@@ -124,14 +125,31 @@ const requeteParties = {
     WHERE p.statut != 'en_cours'
     ORDER BY p.jour
   `),
+  tous: db.prepare('SELECT jour, statut FROM parties WHERE sub = ?'),
   upsertJoueur: db.prepare(`
     INSERT INTO joueurs (sub, nom) VALUES (?, ?)
     ON CONFLICT(sub) DO UPDATE SET nom = excluded.nom
   `),
 };
 
-function etatPartie(sub) {
-  const jour = jourParis();
+function jourValide(jour) {
+  return typeof jour === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(jour) && jour >= DATE_DEBUT && jour <= jourParis();
+}
+
+function listerJours(sub) {
+  const aujourdhui = jourParis();
+  const statuts = new Map(requeteParties.tous.all(sub).map((l) => [l.jour, l.statut]));
+  const jours = [];
+  const [a, m, d] = DATE_DEBUT.split('-').map(Number);
+  for (let t = Date.UTC(a, m - 1, d); ; t += 86400000) {
+    const jour = new Date(t).toISOString().slice(0, 10);
+    if (jour > aujourdhui) break;
+    jours.push({ jour, statut: statuts.get(jour) ?? null });
+  }
+  return { aujourdhui, jours: jours.reverse() };
+}
+
+function etatPartie(sub, jour) {
   let partie = requeteParties.lire.get(sub, jour);
   if (!partie) {
     requeteParties.creer.run(sub, jour, motDuJour(jour, motsDuJour));
@@ -149,8 +167,8 @@ function etatPartie(sub) {
   };
 }
 
-function ajouterEssai(sub, brut) {
-  const jour = jourParis();
+function ajouterEssai(sub, jour, brut) {
+  if (!jourValide(jour)) return { erreur: 400, message: 'Jour invalide.' };
   const partie = requeteParties.lire.get(sub, jour);
   if (!partie) return { erreur: 404, message: 'Partie introuvable.' };
   if (partie.statut !== 'en_cours') return { erreur: 409, message: 'La partie est terminée.' };
@@ -170,7 +188,7 @@ function ajouterEssai(sub, brut) {
   if (mot === cible) statut = 'gagnee';
   else if (essais.length >= ESSAIS_MAX) statut = 'perdue';
   requeteParties.maj.run(JSON.stringify(essais), statut, sub, jour);
-  return { etat: etatPartie(sub) };
+  return { etat: etatPartie(sub, jour) };
 }
 
 function calculerClassement() {
@@ -232,8 +250,14 @@ async function routeApi(req, res, url) {
   const session = sessionDepuis(req);
   if (!session) return envoyerJson(res, 401, { erreur: 'Non connecté.' });
 
+  if (url.pathname === '/api/jours' && req.method === 'GET') {
+    return envoyerJson(res, 200, listerJours(session.sub));
+  }
+
   if (url.pathname === '/api/partie' && req.method === 'GET') {
-    return envoyerJson(res, 200, etatPartie(session.sub));
+    const jour = url.searchParams.get('jour') || jourParis();
+    if (!jourValide(jour)) return envoyerJson(res, 400, { erreur: 'Jour invalide.' });
+    return envoyerJson(res, 200, etatPartie(session.sub, jour));
   }
 
   if (url.pathname === '/api/essai' && req.method === 'POST') {
@@ -241,7 +265,7 @@ async function routeApi(req, res, url) {
       return envoyerJson(res, 415, { erreur: 'JSON attendu.' });
     }
     const corps = await lireCorps(req);
-    const resultat = ajouterEssai(session.sub, corps.mot);
+    const resultat = ajouterEssai(session.sub, corps.jour, corps.mot);
     if (resultat.erreur) return envoyerJson(res, resultat.erreur, { erreur: resultat.message });
     return envoyerJson(res, 200, resultat.etat);
   }
