@@ -147,6 +147,9 @@ select {
   align-items: center;
   gap: 0.4rem;
   margin-top: 1rem;
+  width: var(--largeur-clavier);
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .rangee {
@@ -202,11 +205,22 @@ button.secondaire {
   color: var(--texte);
 }
 
+:root {
+  --largeur-clavier: min(100%, 25rem);
+}
+
 .actions {
   display: flex;
-  justify-content: center;
-  gap: 0.75rem;
-  margin-top: 0.75rem;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: var(--largeur-clavier);
+  margin: 0.75rem auto 0;
+}
+
+.actions .bouton,
+.actions button.secondaire {
+  width: 100%;
+  text-align: center;
 }
 
 #connexion {
