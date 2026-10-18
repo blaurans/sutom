@@ -233,5 +233,6 @@ async function demarrer() {
 
 $('choix-jour').addEventListener('change', (evenement) => changerJour(evenement.target.value));
 $('tout-effacer').addEventListener('click', toutEffacer);
+$('valider').addEventListener('click', soumettre);
 
 demarrer().catch((erreur) => afficherMessage(erreur.message, 'erreur'));
