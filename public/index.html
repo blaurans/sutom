@@ -10,6 +10,10 @@
     <header>
       <div class="titre">
         <h1>SUTOM</h1>
+        <div id="zone-jour" hidden>
+          <label for="choix-jour">Mot du</label>
+          <select id="choix-jour"></select>
+        </div>
         <button type="button" id="mode-emploi-ouvrir" class="secondaire" aria-label="Mode d'emploi">?</button>
       </div>
       <div id="compte" hidden>
@@ -27,7 +31,6 @@
       </section>
 
       <section id="jeu" hidden>
-        <p class="choix-jour"><label for="choix-jour">Mot du</label> <select id="choix-jour"></select></p>
         <div id="grille" aria-label="Grille de jeu"></div>
         <p id="message" role="status"></p>
         <div id="clavier"></div>

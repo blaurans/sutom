@@ -58,9 +58,12 @@ main {
   margin: 0;
 }
 
-.choix-jour {
-  text-align: center;
-  margin-bottom: 0;
+#zone-jour {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--discret);
+  font-size: 0.9rem;
 }
 
 select {

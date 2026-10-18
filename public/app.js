@@ -273,6 +273,7 @@ async function demarrer() {
 
   $('nom').textContent = session.nom;
   $('compte').hidden = false;
+  $('zone-jour').hidden = false;
   $('jeu').hidden = false;
   const aujourdhui = await chargerChoixJour();
   await changerJour(aujourdhui);
