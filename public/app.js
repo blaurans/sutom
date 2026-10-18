@@ -251,7 +251,6 @@ async function chargerClassement() {
       `${joueur.pourcentage}%`,
       joueur.serie,
       joueur.meilleureSerie,
-      joueur.moyenneEssais ?? '–',
     ];
     for (const valeur of valeurs) {
       const cellule = document.createElement('td');
