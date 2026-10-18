@@ -79,25 +79,28 @@ select {
 #grille {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   gap: 0.4rem;
   margin: 1rem 0;
+  width: 100%;
 }
 
 .ligne {
   display: flex;
   gap: 0.25rem;
+  width: 100%;
 }
 
 .case {
-  width: clamp(1.6rem, 7vw, 3rem);
-  height: clamp(1.6rem, 7vw, 3rem);
+  flex: 1 1 0;
+  min-width: 0;
+  aspect-ratio: 1 / 1;
   display: grid;
   place-items: center;
   border-radius: 6px;
   background: var(--carte);
   font-weight: 700;
-  font-size: clamp(1rem, 3.5vw, 1.4rem);
+  font-size: clamp(0.9rem, 4.5vw, 1.6rem);
   border: 2px solid transparent;
 }
 
