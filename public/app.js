@@ -109,7 +109,7 @@ function rendreEtat() {
   } else if (etat.statut === 'perdue') {
     afficherMessage(`Perdu. Le mot était : ${etat.mot.toUpperCase()}. Prochain mot demain à minuit.`, 'echec');
   } else {
-    afficherMessage('Mode dur : la première lettre est imposée. Les couleurs t\'indiquent les lettres bien ou mal placées.');
+    afficherMessage('');
   }
 }
 
