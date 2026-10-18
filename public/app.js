@@ -117,7 +117,6 @@ function rendreClavier() {
 }
 
 function rendreEtat() {
-  $('info').textContent = `Mot du ${etat.jour} · ${etat.longueur} lettres · ${etat.essaisMax} essais · mode dur`;
   rendreGrille();
   rendreClavier();
 
