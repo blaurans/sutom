@@ -235,7 +235,7 @@ function calculerClassement() {
     const essais = JSON.parse(ligne.essais);
     const joueur = joueurs.get(ligne.nom) || { nom: ligne.nom, parties: [] };
     const gagnee = ligne.statut === 'gagnee';
-    const points = (gagnee ? 100 - 10 * essais.length : 0) - coutAides(JSON.parse(ligne.aides));
+    const points = Math.max(0, (gagnee ? 100 - 10 * essais.length : 0) - coutAides(JSON.parse(ligne.aides)));
     joueur.parties.push({ jour: indexJour(ligne.jour), gagnee, essais: essais.length, points });
     joueurs.set(ligne.nom, joueur);
   }
