@@ -175,6 +175,7 @@ async function chargerClassement() {
     const ligne = document.createElement('tr');
     const valeurs = [
       joueur.nom,
+      joueur.score,
       joueur.joues,
       joueur.victoires,
       `${joueur.pourcentage}%`,

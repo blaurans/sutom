@@ -217,8 +217,10 @@ function calculerClassement() {
       const moyenne = victoires.length
         ? Math.round((victoires.reduce((s, p) => s + p.essais, 0) / victoires.length) * 10) / 10
         : null;
+      const score = victoires.reduce((s, p) => s + (ESSAIS_MAX + 1 - p.essais), 0);
       return {
         nom,
+        score,
         joues: parties.length,
         victoires: victoires.length,
         pourcentage: Math.round((victoires.length / parties.length) * 100),
@@ -229,8 +231,8 @@ function calculerClassement() {
     })
     .sort(
       (a, b) =>
+        b.score - a.score ||
         b.victoires - a.victoires ||
-        b.pourcentage - a.pourcentage ||
         (a.moyenneEssais ?? 99) - (b.moyenneEssais ?? 99),
     );
 }
