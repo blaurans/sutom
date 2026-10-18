@@ -128,7 +128,7 @@ const requeteParties = {
   maj: db.prepare('UPDATE parties SET essais = ?, statut = ? WHERE sub = ? AND jour = ?'),
   majAides: db.prepare('UPDATE parties SET aides = ? WHERE sub = ? AND jour = ?'),
   terminees: db.prepare(`
-    SELECT j.nom, p.jour, p.statut, p.essais, p.aides
+    SELECT j.sub, j.nom, p.jour, p.statut, p.essais, p.aides
     FROM parties p JOIN joueurs j ON j.sub = p.sub
     WHERE p.statut != 'en_cours'
     ORDER BY p.jour
@@ -229,15 +229,21 @@ function ajouterEssai(sub, jour, brut) {
   return { etat: etatPartie(sub, jour) };
 }
 
+function nomAffiche(nom) {
+  const morceaux = nom.trim().split(/\s+/);
+  if (morceaux.length === 1) return morceaux[0];
+  return `${morceaux[0]} ${morceaux[morceaux.length - 1][0].toUpperCase()}.`;
+}
+
 function calculerClassement() {
   const joueurs = new Map();
   for (const ligne of requeteParties.terminees.all()) {
     const essais = JSON.parse(ligne.essais);
-    const joueur = joueurs.get(ligne.nom) || { nom: ligne.nom, parties: [] };
+    const joueur = joueurs.get(ligne.sub) || { nom: nomAffiche(ligne.nom), parties: [] };
     const gagnee = ligne.statut === 'gagnee';
     const points = Math.max(0, (gagnee ? 100 - 10 * essais.length : 0) - coutAides(JSON.parse(ligne.aides)));
     joueur.parties.push({ jour: indexJour(ligne.jour), gagnee, essais: essais.length, points });
-    joueurs.set(ligne.nom, joueur);
+    joueurs.set(ligne.sub, joueur);
   }
   const aujourd = indexJour(jourParis());
   return [...joueurs.values()]
