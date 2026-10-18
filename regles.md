@@ -21,15 +21,20 @@ Hébergement : ociub (Oracle Cloud, aarch64), dossier `/app/sutom`
 ### Mode dur
 
 - La première lettre reste imposée.
-- Toute lettre rouge doit être réutilisée à la même place dans les essais suivants.
-- Toute lettre jaune doit figurer dans les essais suivants.
+- Les couleurs indiquent les lettres bien placées (rouge) et mal placées (jaune) : aucune contrainte de réutilisation n'est imposée au joueur.
+- La difficulté vient de la rareté du mot du jour, pas de contraintes sur les essais.
+
+### Saisie
+
+- Retour arrière (⌫) : efface la dernière lettre.
+- Échap ou « Tout effacer » : efface toute la saisie de la ligne en cours.
 
 ## Dictionnaire
 
 - Union de **Lexique 3** (mots courants, fréquences) et **ODS** (exhaustivité).
 - Filtrage : lettres A-Z uniquement (sans tiret ni apostrophe), longueur 8 à 10, sans accents, sans majuscules.
 - Le dictionnaire de **validation** (mots acceptés en proposition) est large.
-- La **liste des mots du jour** est plus restreinte : mots courants, relus manuellement.
+- La **liste des mots du jour** est volontairement rare : lemmes de fréquence littéraire entre 0,5 et 4 occurrences par million (Lexique 3), noms masculins singuliers, verbes à l'infinitif et adjectifs masculins singuliers, sans noms propres ni gentilés. Elle doit être relue manuellement.
 - Points à valider : licences de redistribution (Lexique 3 est CC BY-SA 4.0, ODS à vérifier).
 
 ## Comptes et classement

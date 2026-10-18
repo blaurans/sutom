@@ -109,7 +109,7 @@ function rendreEtat() {
   } else if (etat.statut === 'perdue') {
     afficherMessage(`Perdu. Le mot était : ${etat.mot.toUpperCase()}. Prochain mot demain à minuit.`, 'echec');
   } else {
-    afficherMessage('Mode dur : les lettres rouges et jaunes doivent être réutilisées.');
+    afficherMessage('Mode dur : la première lettre est imposée. Les couleurs t\'indiquent les lettres bien ou mal placées.');
   }
 }
 
@@ -122,6 +122,12 @@ function ajouter(lettre) {
 function effacer() {
   if (etat.statut !== 'en_cours') return;
   saisie = saisie.slice(0, -1);
+  rendreGrille();
+}
+
+function toutEffacer() {
+  if (etat.statut !== 'en_cours') return;
+  saisie = '';
   rendreGrille();
 }
 
@@ -148,6 +154,7 @@ document.addEventListener('keydown', (evenement) => {
   if (evenement.ctrlKey || evenement.metaKey || evenement.altKey || !etat) return;
   if (evenement.key === 'Enter') return soumettre();
   if (evenement.key === 'Backspace') return effacer();
+  if (evenement.key === 'Escape') return toutEffacer();
   if (evenement.key.length === 1) {
     const lettre = normaliserLettre(evenement.key);
     if (lettre) ajouter(lettre);
@@ -195,5 +202,7 @@ async function demarrer() {
   rendreEtat();
   chargerClassement();
 }
+
+$('tout-effacer').addEventListener('click', toutEffacer);
 
 demarrer().catch((erreur) => afficherMessage(erreur.message, 'erreur'));

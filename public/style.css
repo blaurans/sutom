@@ -189,6 +189,12 @@ button.secondaire {
   color: var(--texte);
 }
 
+.actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.75rem;
+}
+
 #connexion {
   text-align: center;
   margin-top: 3rem;

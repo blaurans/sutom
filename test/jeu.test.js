@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { indexJour, motDuJour, normaliser, score, violationModeDur } from '../src/jeu.js';
+import { indexJour, motDuJour, normaliser, score } from '../src/jeu.js';
 
 test('normaliser retire accents, casse et caractères non alphabétiques', () => {
   assert.equal(normaliser('Élève'), 'eleve');
@@ -12,16 +12,6 @@ test('score gère les lettres doublées', () => {
     'absent', 'correct', 'absent', 'present', 'absent', 'absent', 'absent', 'absent',
   ]);
   assert.deepEqual(score('plaisirs', 'plaisirs'), Array(8).fill('correct'));
-});
-
-test('mode dur impose la réutilisation des lettres rouges', () => {
-  assert.match(violationModeDur(['chevaleur'], 'chaussure', 'cerisiers'), /H en position 2/);
-  assert.equal(violationModeDur(['chevaleur'], 'chaussure', 'chaussure'), null);
-});
-
-test('mode dur impose la présence des lettres jaunes', () => {
-  assert.match(violationModeDur(['xxxxxxxxh'], 'chaussure', 'cerisiers'), /H doit être réutilisée/);
-  assert.equal(violationModeDur(['xxxxxxxxh'], 'chaussure', 'chevaleur'), null);
 });
 
 test('indexJour est croissant par jour et motDuJour boucle sur la liste', () => {

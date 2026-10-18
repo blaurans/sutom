@@ -11,7 +11,6 @@ import {
   motDuJour,
   normaliser,
   score,
-  violationModeDur,
 } from './jeu.js';
 
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -165,9 +164,6 @@ function ajouterEssai(sub, brut) {
   if (mot[0] !== cible[0]) return { erreur: 400, message: `Le mot doit commencer par ${cible[0].toUpperCase()}.` };
   if (!dictionnaire.has(mot)) return { erreur: 400, message: 'Mot absent du dictionnaire.' };
   if (essais.includes(mot)) return { erreur: 400, message: 'Mot déjà proposé.' };
-
-  const violation = violationModeDur(essais, cible, mot);
-  if (violation) return { erreur: 400, message: violation };
 
   essais.push(mot);
   let statut = 'en_cours';
