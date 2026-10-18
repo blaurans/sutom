@@ -1,6 +1,7 @@
 const RANGEES = ['azertyuiop', 'qsdfghjklm', 'wxcvbn'];
 const ORDRE = { absent: 0, present: 1, correct: 2 };
 const COUT_AIDE = { exclure: 2, reveler: 5 };
+const LIGNES_DEPART = 6;
 
 let etat = null;
 let saisie = [];
@@ -52,8 +53,9 @@ function rendreGrille() {
   grille.style.setProperty('--colonnes', etat.longueur);
   const enCours = etat.statut === 'en_cours';
   const fixes = lettresFixes();
+  const lignes = Math.min(etat.essaisMax, Math.max(LIGNES_DEPART, etat.essais.length + (enCours ? 1 : 0)));
 
-  for (let r = 0; r < etat.essaisMax; r++) {
+  for (let r = 0; r < lignes; r++) {
     const ligne = document.createElement('div');
     ligne.className = 'ligne';
     const essai = etat.essais[r];
@@ -218,11 +220,10 @@ async function chargerChoixJour() {
   const { aujourdhui, jours } = await appeler('/api/jours');
   const choix = $('choix-jour');
   choix.innerHTML = '';
-  for (const { jour, statut } of jours) {
+  for (const { jour } of jours) {
     const option = document.createElement('option');
     option.value = jour;
-    const suffixe = statut ? LIBELLES_STATUT[statut] : 'à jouer';
-    option.textContent = `${jour}${jour === aujourdhui ? ' (aujourd\'hui)' : ''} · ${suffixe}`;
+    option.textContent = `${jour.slice(8, 10)}-${jour.slice(5, 7)}`;
     choix.appendChild(option);
   }
   choix.value = jourAffiche || aujourdhui;
