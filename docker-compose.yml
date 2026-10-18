@@ -1,0 +1,35 @@
+services:
+  sutom:
+    build: .
+    container_name: sutom
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      PORT: "3000"
+      APP_BASE_URL: https://sutom.laurans.org
+      DATA_DIR: /data
+    volumes:
+      - sutom_data:/data
+    networks: [internal]
+
+  backup:
+    image: keinos/sqlite3:latest
+    restart: unless-stopped
+    volumes:
+      - sutom_data:/data:ro
+      - sutom_backups:/backups
+    user: "0:0"
+    command:
+      - /bin/sh
+      - -c
+      - while true; do TS=$$(date +%Y%m%d-%H%M%S); sqlite3 /data/sutom.db ".backup /backups/sutom-$$TS.db"; find /backups -name "sutom-*.db" -mtime +14 -delete; sleep 86400; done
+    networks: [internal]
+
+volumes:
+  sutom_data:
+  sutom_backups:
+
+networks:
+  internal:
+    external: true
+    name: guacamole_internal

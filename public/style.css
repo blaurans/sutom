@@ -1,0 +1,226 @@
+:root {
+  --fond: #14161c;
+  --texte: #f2f2f2;
+  --discret: #9aa0ab;
+  --carte: #1f232c;
+  --correct: #c0392b;
+  --present: #d4a017;
+  --absent: #3a3f4b;
+  --indice: #2c3140;
+  --accent: #5b8def;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--fond);
+  color: var(--texte);
+  min-height: 100vh;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--carte);
+}
+
+h1 {
+  margin: 0;
+  letter-spacing: 0.15em;
+  font-size: 1.6rem;
+}
+
+h2 {
+  margin-top: 0;
+}
+
+main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+#compte {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--discret);
+}
+
+#compte form {
+  margin: 0;
+}
+
+#info {
+  color: var(--discret);
+  text-align: center;
+}
+
+#grille {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 1rem 0;
+}
+
+.ligne {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.case {
+  width: clamp(2rem, 8vw, 3rem);
+  height: clamp(2rem, 8vw, 3rem);
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+  background: var(--carte);
+  font-weight: 700;
+  font-size: clamp(1rem, 3.5vw, 1.4rem);
+  border: 2px solid transparent;
+}
+
+.case.correct {
+  background: var(--correct);
+}
+
+.case.present {
+  background: var(--present);
+  color: #111;
+}
+
+.case.absent {
+  background: var(--absent);
+}
+
+.case.indice {
+  background: var(--indice);
+  color: var(--discret);
+}
+
+.case.saisie {
+  border-color: var(--accent);
+}
+
+#message {
+  min-height: 1.5em;
+  text-align: center;
+  color: var(--discret);
+}
+
+#message.succes {
+  color: #6fd38a;
+}
+
+#message.echec {
+  color: #ff8a80;
+}
+
+#message.erreur {
+  color: #ffb74d;
+}
+
+#clavier {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 1rem;
+}
+
+.rangee {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.touche {
+  min-width: 2.2rem;
+  height: 2.8rem;
+  border: 0;
+  border-radius: 6px;
+  background: var(--carte);
+  color: var(--texte);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.touche.large {
+  min-width: 3.6rem;
+  font-size: 0.8rem;
+}
+
+.touche.correct {
+  background: var(--correct);
+}
+
+.touche.present {
+  background: var(--present);
+  color: #111;
+}
+
+.touche.absent {
+  background: var(--absent);
+  color: var(--discret);
+}
+
+.bouton,
+button.secondaire {
+  display: inline-block;
+  padding: 0.6rem 1rem;
+  border: 0;
+  border-radius: 6px;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+button.secondaire {
+  background: var(--carte);
+  color: var(--texte);
+}
+
+#connexion {
+  text-align: center;
+  margin-top: 3rem;
+}
+
+#classement {
+  margin-top: 2.5rem;
+}
+
+.tableau {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 0.5rem;
+  text-align: left;
+  border-bottom: 1px solid var(--carte);
+}
+
+th {
+  color: var(--discret);
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+td:not(:first-child),
+th:not(:first-child) {
+  text-align: right;
+}

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SUTOM</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>SUTOM</h1>
+      <div id="compte" hidden>
+        <span id="nom"></span>
+        <form method="post" action="/auth/deconnexion">
+          <button type="submit" class="secondaire">Déconnexion</button>
+        </form>
+      </div>
+    </header>
+
+    <main>
+      <section id="connexion" hidden>
+        <p>Connecte-toi avec ton compte Google pour jouer.</p>
+        <a class="bouton" href="/auth/google">Se connecter avec Google</a>
+      </section>
+
+      <section id="jeu" hidden>
+        <p id="info"></p>
+        <div id="grille" aria-label="Grille de jeu"></div>
+        <p id="message" role="status"></p>
+        <div id="clavier"></div>
+      </section>
+
+      <section id="classement" hidden>
+        <h2>Classement</h2>
+        <div class="tableau">
+          <table>
+            <thead>
+              <tr>
+                <th>Joueur</th>
+                <th>Joués</th>
+                <th>Victoires</th>
+                <th>%</th>
+                <th>Série</th>
+                <th>Meilleure</th>
+                <th>Essais (moy.)</th>
+              </tr>
+            </thead>
+            <tbody id="classement-corps"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>
