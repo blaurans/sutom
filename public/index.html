@@ -8,7 +8,10 @@
   </head>
   <body>
     <header>
-      <h1>SUTOM</h1>
+      <div class="titre">
+        <h1>SUTOM</h1>
+        <button type="button" id="mode-emploi-ouvrir" class="secondaire" aria-label="Mode d'emploi">?</button>
+      </div>
       <div id="compte" hidden>
         <span id="nom"></span>
         <form method="post" action="/auth/deconnexion">
@@ -30,8 +33,12 @@
         <p id="message" role="status"></p>
         <div id="clavier"></div>
         <div class="actions">
-          <button type="button" id="tout-effacer" class="secondaire">Tout effacer</button>
           <button type="button" id="valider" class="bouton">Valider</button>
+          <div class="aides">
+            <button type="button" id="aide-exclure" class="secondaire">Enlève une lettre (−2)</button>
+            <button type="button" id="aide-reveler" class="secondaire">Donne une lettre (−5)</button>
+          </div>
+          <button type="button" id="tout-effacer" class="secondaire">Tout effacer</button>
         </div>
       </section>
 
@@ -56,6 +63,23 @@
         </div>
       </section>
     </main>
+
+    <dialog id="mode-emploi">
+      <h2>Mode d'emploi</h2>
+      <ul>
+        <li>Trouve le mot du jour : entre 8 et 10 lettres, 9 essais. La première lettre est donnée.</li>
+        <li><span class="exemple correct">Rouge</span> : lettre bien placée.</li>
+        <li><span class="exemple present">Jaune</span> : lettre présente dans le mot mais mal placée.</li>
+        <li><span class="exemple absent">Gris</span> : lettre absente du mot.</li>
+        <li><strong>Enlève une lettre</strong> (−2 pts) : retire du clavier une lettre qui n'est pas dans le mot.</li>
+        <li><strong>Donne une lettre</strong> (−5 pts) : révèle une lettre à sa bonne place.</li>
+        <li><strong>Score</strong> : une victoire rapporte 100 − 10 × nombre d'essais, moins les points des aides. Une défaite rapporte 0, moins les aides.</li>
+        <li>Échap ou « Tout effacer » vide la saisie en cours.</li>
+      </ul>
+      <form method="dialog">
+        <button id="mode-emploi-fermer" class="bouton" type="button">Fermer</button>
+      </form>
+    </dialog>
 
     <script type="module" src="/app.js"></script>
   </body>

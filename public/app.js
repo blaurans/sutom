@@ -1,8 +1,9 @@
 const RANGEES = ['azertyuiop', 'qsdfghjklm', 'wxcvbn'];
 const ORDRE = { absent: 0, present: 1, correct: 2 };
+const COUT_AIDE = { exclure: 2, reveler: 5 };
 
 let etat = null;
-let saisie = '';
+let saisie = [];
 let jourAffiche = null;
 
 const $ = (id) => document.getElementById(id);
@@ -34,11 +35,23 @@ function afficherMessage(texte, classe = '') {
   message.className = classe;
 }
 
+function lettresFixes() {
+  const fixes = Array(etat.longueur).fill(null);
+  fixes[0] = etat.premiereLettre;
+  for (const { position, lettre } of etat.aides.revelees) fixes[position] = lettre;
+  return fixes;
+}
+
+function lettreA(i, fixes) {
+  return fixes[i] ?? saisie[i] ?? '';
+}
+
 function rendreGrille() {
   const grille = $('grille');
   grille.innerHTML = '';
   grille.style.setProperty('--colonnes', etat.longueur);
   const enCours = etat.statut === 'en_cours';
+  const fixes = lettresFixes();
 
   for (let r = 0; r < etat.essaisMax; r++) {
     const ligne = document.createElement('div');
@@ -52,11 +65,11 @@ function rendreGrille() {
       if (essai) {
         cellule.textContent = essai.mot[c].toUpperCase();
         cellule.classList.add(essai.resultat[c]);
-      } else if (c === 0) {
-        cellule.textContent = etat.premiereLettre.toUpperCase();
+      } else if (fixes[c]) {
+        cellule.textContent = fixes[c].toUpperCase();
         cellule.classList.add('indice');
       } else if (courante) {
-        cellule.textContent = (saisie[c - 1] || '').toUpperCase();
+        cellule.textContent = (saisie[c] || '').toUpperCase();
         cellule.classList.add('saisie');
       }
       ligne.appendChild(cellule);
@@ -75,6 +88,7 @@ function rendreClavier() {
       }
     });
   }
+  for (const lettre of etat.aides.exclues) etatLettres[lettre] = 'absent';
 
   const clavier = $('clavier');
   clavier.innerHTML = '';
@@ -117,39 +131,73 @@ function rendreEtat() {
 }
 
 function ajouter(lettre) {
-  if (etat.statut !== 'en_cours' || saisie.length >= etat.longueur - 1) return;
-  saisie += lettre;
+  if (etat.statut !== 'en_cours' || etat.aides.exclues.includes(lettre)) return;
+  const fixes = lettresFixes();
+  const i = fixes.findIndex((l, idx) => l === null && !saisie[idx]);
+  if (i === -1) return;
+  saisie[i] = lettre;
   rendreGrille();
 }
 
 function effacer() {
   if (etat.statut !== 'en_cours') return;
-  saisie = saisie.slice(0, -1);
+  const fixes = lettresFixes();
+  for (let i = fixes.length - 1; i >= 0; i--) {
+    if (fixes[i] === null && saisie[i]) {
+      saisie[i] = '';
+      break;
+    }
+  }
   rendreGrille();
 }
 
 function toutEffacer() {
   if (etat.statut !== 'en_cours') return;
-  saisie = '';
+  saisie = [];
   rendreGrille();
 }
 
 async function soumettre() {
   if (etat.statut !== 'en_cours') return;
-  if (saisie.length !== etat.longueur - 1) {
+  const fixes = lettresFixes();
+  const lettres = fixes.map((_, i) => lettreA(i, fixes));
+  if (lettres.some((l) => !l)) {
     afficherMessage(`Le mot doit contenir ${etat.longueur} lettres.`, 'erreur');
     return;
   }
   try {
     etat = await appeler('/api/essai', {
       method: 'POST',
-      body: JSON.stringify({ jour: etat.jour, mot: etat.premiereLettre + saisie }),
+      body: JSON.stringify({ jour: etat.jour, mot: lettres.join('') }),
     });
-    saisie = '';
+    saisie = [];
     rendreEtat();
     if (etat.statut !== 'en_cours') {
       chargerClassement();
       chargerChoixJour();
+    }
+  } catch (erreur) {
+    afficherMessage(erreur.message, 'erreur');
+  }
+}
+
+async function utiliserAide(type) {
+  if (etat.statut !== 'en_cours') return;
+  const libelle = type === 'exclure' ? 'enlever une lettre' : 'donner une lettre';
+  if (!confirm(`Utiliser l'aide « ${libelle} » pour ${COUT_AIDE[type]} points ?`)) return;
+  const avant = etat.aides;
+  try {
+    etat = await appeler('/api/aide', {
+      method: 'POST',
+      body: JSON.stringify({ jour: etat.jour, type }),
+    });
+    rendreEtat();
+    if (type === 'exclure') {
+      const nouvelle = etat.aides.exclues.find((l) => !avant.exclues.includes(l));
+      afficherMessage(`La lettre ${nouvelle.toUpperCase()} n'est pas dans le mot (−${COUT_AIDE[type]} pts).`, 'indice-texte');
+    } else {
+      const nouvelle = etat.aides.revelees.find((r) => !avant.revelees.some((a) => a.position === r.position));
+      afficherMessage(`La lettre ${nouvelle.lettre.toUpperCase()} est en position ${nouvelle.position + 1} (−${COUT_AIDE[type]} pts).`, 'indice-texte');
     }
   } catch (erreur) {
     afficherMessage(erreur.message, 'erreur');
@@ -166,6 +214,28 @@ document.addEventListener('keydown', (evenement) => {
     if (lettre) ajouter(lettre);
   }
 });
+
+async function chargerChoixJour() {
+  const { aujourdhui, jours } = await appeler('/api/jours');
+  const choix = $('choix-jour');
+  choix.innerHTML = '';
+  for (const { jour, statut } of jours) {
+    const option = document.createElement('option');
+    option.value = jour;
+    const suffixe = statut ? LIBELLES_STATUT[statut] : 'à jouer';
+    option.textContent = `${jour}${jour === aujourdhui ? ' (aujourd\'hui)' : ''} · ${suffixe}`;
+    choix.appendChild(option);
+  }
+  choix.value = jourAffiche || aujourdhui;
+  return aujourdhui;
+}
+
+async function changerJour(jour) {
+  saisie = [];
+  jourAffiche = jour;
+  etat = await appeler(`/api/partie?jour=${encodeURIComponent(jour)}`);
+  rendreEtat();
+}
 
 async function chargerClassement() {
   const { joueurs } = await appeler('/api/classement');
@@ -193,28 +263,6 @@ async function chargerClassement() {
   $('classement').hidden = false;
 }
 
-async function chargerChoixJour() {
-  const { aujourdhui, jours } = await appeler('/api/jours');
-  const choix = $('choix-jour');
-  choix.innerHTML = '';
-  for (const { jour, statut } of jours) {
-    const option = document.createElement('option');
-    option.value = jour;
-    const suffixe = statut ? LIBELLES_STATUT[statut] : 'à jouer';
-    option.textContent = `${jour}${jour === aujourdhui ? ' (aujourd\'hui)' : ''} · ${suffixe}`;
-    choix.appendChild(option);
-  }
-  choix.value = jourAffiche || aujourdhui;
-  return aujourdhui;
-}
-
-async function changerJour(jour) {
-  saisie = '';
-  jourAffiche = jour;
-  etat = await appeler(`/api/partie?jour=${encodeURIComponent(jour)}`);
-  rendreEtat();
-}
-
 async function demarrer() {
   let session;
   try {
@@ -235,5 +283,9 @@ async function demarrer() {
 $('choix-jour').addEventListener('change', (evenement) => changerJour(evenement.target.value));
 $('tout-effacer').addEventListener('click', toutEffacer);
 $('valider').addEventListener('click', soumettre);
+$('aide-exclure').addEventListener('click', () => utiliserAide('exclure'));
+$('aide-reveler').addEventListener('click', () => utiliserAide('reveler'));
+$('mode-emploi-ouvrir').addEventListener('click', () => $('mode-emploi').showModal());
+$('mode-emploi-fermer').addEventListener('click', () => $('mode-emploi').close());
 
 demarrer().catch((erreur) => afficherMessage(erreur.message, 'erreur'));

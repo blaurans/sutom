@@ -43,8 +43,14 @@ Hébergement : ociub (Oracle Cloud, aarch64), dossier `/app/sutom`
 - Classement **global**, visible par tous les joueurs connectés.
 - Affichage : **nom affiché Google uniquement**, jamais l'adresse e-mail.
 - Stats par joueur : parties jouées, victoires, % de victoires, série en cours, meilleure série, nombre moyen d'essais.
-- **Score** (colonne principale du classement) : chaque victoire rapporte `10 − nombre d'essais` points (1 essai = 9 pts, 9 essais = 1 pt). Une défaite rapporte 0. Le score est le total des points, il récompense à la fois la réussite, la rapidité et la régularité.
+- **Score** (colonne principale du classement) : une victoire rapporte `100 − 10 × nombre d'essais` points (1 essai = 90 pts, 9 essais = 10 pts). Une défaite rapporte 0. Les aides retirent leur coût (voir ci-dessous) dans tous les cas. Le score d'un joueur est le total de ses points sur toutes les parties.
 - Tri du classement : score, puis victoires, puis nombre moyen d'essais.
+
+### Aides
+
+- **Enlève une lettre** (−2 pts) : retire du clavier une lettre qui n'est pas dans le mot. Utilisable plusieurs fois tant qu'il reste de telles lettres.
+- **Donne une lettre** (−5 pts) : révèle une lettre à sa bonne place (jamais la première, déjà donnée). Utilisable plusieurs fois.
+- Les aides ne sont disponibles que pendant la partie en cours. Elles sont enregistrées et comptées dans le score.
 
 ## Architecture technique
 

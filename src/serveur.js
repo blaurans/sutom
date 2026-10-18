@@ -17,6 +17,9 @@ import {
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PUBLIC = path.join(RACINE, 'public');
 const DUREE_SESSION_MS = 30 * 24 * 3600 * 1000;
+const ALPHABET = 'abcdefghijklmnopqrstuvwxyz';
+const COUT_AIDE = { exclure: 2, reveler: 5 };
+const AIDES_VIDES = '{"exclues":[],"revelees":[]}';
 
 function requis(nom) {
   const valeur = process.env[nom];
@@ -54,6 +57,10 @@ db.exec(`
     PRIMARY KEY (sub, jour)
   );
 `);
+
+if (!db.prepare('PRAGMA table_info(parties)').all().some((c) => c.name === 'aides')) {
+  db.exec(`ALTER TABLE parties ADD COLUMN aides TEXT NOT NULL DEFAULT '${AIDES_VIDES}'`);
+}
 
 const securise = config.baseUrl.startsWith('https');
 
@@ -116,11 +123,12 @@ function sessionDepuis(req) {
 }
 
 const requeteParties = {
-  lire: db.prepare('SELECT mot, essais, statut FROM parties WHERE sub = ? AND jour = ?'),
+  lire: db.prepare('SELECT mot, essais, statut, aides FROM parties WHERE sub = ? AND jour = ?'),
   creer: db.prepare("INSERT OR IGNORE INTO parties (sub, jour, mot) VALUES (?, ?, ?)"),
   maj: db.prepare('UPDATE parties SET essais = ?, statut = ? WHERE sub = ? AND jour = ?'),
+  majAides: db.prepare('UPDATE parties SET aides = ? WHERE sub = ? AND jour = ?'),
   terminees: db.prepare(`
-    SELECT j.nom, p.jour, p.statut, p.essais
+    SELECT j.nom, p.jour, p.statut, p.essais, p.aides
     FROM parties p JOIN joueurs j ON j.sub = p.sub
     WHERE p.statut != 'en_cours'
     ORDER BY p.jour
@@ -162,9 +170,39 @@ function etatPartie(sub, jour) {
     premiereLettre: partie.mot[0],
     essaisMax: ESSAIS_MAX,
     essais: essais.map((mot) => ({ mot, resultat: score(mot, partie.mot) })),
+    aides: JSON.parse(partie.aides),
     statut: partie.statut,
     mot: partie.statut === 'en_cours' ? undefined : partie.mot,
   };
+}
+
+function utiliserAide(sub, jour, type) {
+  if (!jourValide(jour)) return { erreur: 400, message: 'Jour invalide.' };
+  if (!COUT_AIDE[type]) return { erreur: 400, message: 'Aide inconnue.' };
+  const partie = requeteParties.lire.get(sub, jour);
+  if (!partie) return { erreur: 404, message: 'Partie introuvable.' };
+  if (partie.statut !== 'en_cours') return { erreur: 409, message: 'La partie est terminée.' };
+
+  const aides = JSON.parse(partie.aides);
+  const cible = partie.mot;
+
+  if (type === 'exclure') {
+    const candidates = [...ALPHABET].filter((l) => !cible.includes(l) && !aides.exclues.includes(l));
+    if (!candidates.length) return { erreur: 409, message: 'Plus aucune lettre à retirer.' };
+    aides.exclues.push(candidates[crypto.randomInt(candidates.length)]);
+  } else {
+    const positions = [...cible].map((_, i) => i).filter((i) => i > 0 && !aides.revelees.some((r) => r.position === i));
+    if (!positions.length) return { erreur: 409, message: 'Toutes les lettres sont déjà révélées.' };
+    const position = positions[crypto.randomInt(positions.length)];
+    aides.revelees.push({ position, lettre: cible[position] });
+  }
+
+  requeteParties.majAides.run(JSON.stringify(aides), sub, jour);
+  return { etat: etatPartie(sub, jour) };
+}
+
+function coutAides(aides) {
+  return aides.exclues.length * COUT_AIDE.exclure + aides.revelees.length * COUT_AIDE.reveler;
 }
 
 function ajouterEssai(sub, jour, brut) {
@@ -196,7 +234,9 @@ function calculerClassement() {
   for (const ligne of requeteParties.terminees.all()) {
     const essais = JSON.parse(ligne.essais);
     const joueur = joueurs.get(ligne.nom) || { nom: ligne.nom, parties: [] };
-    joueur.parties.push({ jour: indexJour(ligne.jour), gagnee: ligne.statut === 'gagnee', essais: essais.length });
+    const gagnee = ligne.statut === 'gagnee';
+    const points = (gagnee ? 100 - 10 * essais.length : 0) - coutAides(JSON.parse(ligne.aides));
+    joueur.parties.push({ jour: indexJour(ligne.jour), gagnee, essais: essais.length, points });
     joueurs.set(ligne.nom, joueur);
   }
   const aujourd = indexJour(jourParis());
@@ -217,7 +257,7 @@ function calculerClassement() {
       const moyenne = victoires.length
         ? Math.round((victoires.reduce((s, p) => s + p.essais, 0) / victoires.length) * 10) / 10
         : null;
-      const score = victoires.reduce((s, p) => s + (ESSAIS_MAX + 1 - p.essais), 0);
+      const score = parties.reduce((s, p) => s + p.points, 0);
       return {
         nom,
         score,
@@ -260,6 +300,13 @@ async function routeApi(req, res, url) {
     const jour = url.searchParams.get('jour') || jourParis();
     if (!jourValide(jour)) return envoyerJson(res, 400, { erreur: 'Jour invalide.' });
     return envoyerJson(res, 200, etatPartie(session.sub, jour));
+  }
+
+  if (url.pathname === '/api/aide' && req.method === 'POST') {
+    const corps = await lireCorps(req);
+    const resultat = utiliserAide(session.sub, corps.jour, corps.type);
+    if (resultat.erreur) return envoyerJson(res, resultat.erreur, { erreur: resultat.message });
+    return envoyerJson(res, 200, resultat.etat);
   }
 
   if (url.pathname === '/api/essai' && req.method === 'POST') {

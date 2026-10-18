@@ -223,6 +223,79 @@ button.secondaire {
   text-align: center;
 }
 
+.aides {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.aides button {
+  flex: 1;
+  font-size: 0.85rem;
+  padding: 0.5rem 0.4rem;
+}
+
+.titre {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.titre button {
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border-radius: 50%;
+  font-weight: 700;
+}
+
+dialog {
+  background: var(--carte);
+  color: var(--texte);
+  border: 1px solid var(--absent);
+  border-radius: 10px;
+  max-width: min(90vw, 32rem);
+  padding: 1.25rem 1.5rem;
+}
+
+dialog::backdrop {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+dialog ul {
+  padding-left: 1.1rem;
+  line-height: 1.5;
+}
+
+dialog form {
+  text-align: right;
+}
+
+.exemple {
+  display: inline-block;
+  min-width: 4.5rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.exemple.correct {
+  background: var(--correct);
+}
+
+.exemple.present {
+  background: var(--present);
+  color: #111;
+}
+
+.exemple.absent {
+  background: var(--absent);
+}
+
+#message.indice-texte {
+  color: #9fd3ff;
+}
+
 #connexion {
   text-align: center;
   margin-top: 3rem;
