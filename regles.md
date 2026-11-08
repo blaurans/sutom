@@ -22,7 +22,7 @@ Hébergement : ociub (Oracle Cloud, aarch64), dossier `/app/sutom`
 
 - La première lettre reste imposée.
 - Les couleurs indiquent les lettres bien placées (rouge) et mal placées (jaune) : aucune contrainte de réutilisation n'est imposée au joueur.
-- La difficulté vient de la rareté du mot du jour, pas de contraintes sur les essais.
+- La difficulté vient de la longueur du mot (8 à 10 lettres) et du tirage, pas d'une rareté obscure ni de contraintes sur les essais.
 
 ### Saisie
 

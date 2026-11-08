@@ -185,7 +185,7 @@ Pour régénérer les listes, les scripts Python ont été lancés depuis `/tmp/
 ## Points ouverts
 
 - **Secret OAuth exposé** : le `GOOGLE_CLIENT_SECRET` a été collé dans une conversation. Le régénérer dans Google Cloud Console, mettre à jour `/app/sutom/.env`, puis `docker compose up -d`.
-- **Relecture de `data/mots-du-jour.txt`** : les filtres automatiques laissent passer des mots douteux (participes, gentilés, mots obscurs). Une relecture humaine est nécessaire avant d'ouvrir le jeu à la famille. Corriger le fichier, commit, déploiement.
+- **Relecture de `data/mots-du-jour.txt`** : les filtres automatiques peuvent laisser passer des mots douteux (gentilés, particules, jargons). Une relecture humaine reste utile. Corriger le fichier, commit, déploiement.
 - **Test sur téléphone** : la mise en page petits écrans (< 480 px) n'a été vérifiée que par lecture du CSS.
 - **Droits GitHub** : un jeton `gh` peut ne pas avoir l'accès en écriture sur `blaurans/sutom`. Vérifier avant un push (`git push` en 403 = permission).
 - **Classement** : un joueur qui se connecte puis ne joue jamais n'apparaît pas. Le nom est affiché sous la forme « Prénom I. ».
