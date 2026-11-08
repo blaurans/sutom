@@ -136,6 +136,15 @@ select {
   border-color: var(--accent);
 }
 
+.case.actif {
+  border-color: var(--texte);
+  border-width: 3px;
+}
+
+.case.saisie {
+  cursor: pointer;
+}
+
 #message {
   min-height: 1.5em;
   text-align: center;

@@ -6,6 +6,7 @@ const LIGNES_DEPART = 6;
 let etat = null;
 let saisie = [];
 let jourAffiche = null;
+let curseur = null;
 
 const $ = (id) => document.getElementById(id);
 
@@ -47,6 +48,16 @@ function lettreA(i, fixes) {
   return fixes[i] ?? saisie[i] ?? '';
 }
 
+function positionsLibres(fixes) {
+  return fixes.map((l, i) => (l === null ? i : null)).filter((i) => i !== null);
+}
+
+function positionActive(fixes) {
+  const libres = positionsLibres(fixes);
+  if (curseur !== null && libres.includes(curseur)) return curseur;
+  return libres[0] ?? null;
+}
+
 function rendreGrille() {
   const grille = $('grille');
   grille.innerHTML = '';
@@ -73,6 +84,11 @@ function rendreGrille() {
       } else if (courante) {
         cellule.textContent = (saisie[c] || '').toUpperCase();
         cellule.classList.add('saisie');
+        if (positionActive(fixes) === c) cellule.classList.add('actif');
+        cellule.addEventListener('click', () => {
+          curseur = c;
+          rendreGrille();
+        });
       }
       ligne.appendChild(cellule);
     }
@@ -134,19 +150,41 @@ function rendreEtat() {
 function ajouter(lettre) {
   if (etat.statut !== 'en_cours' || etat.aides.exclues.includes(lettre)) return;
   const fixes = lettresFixes();
-  const i = fixes.findIndex((l, idx) => l === null && !saisie[idx]);
+  if (positionActive(fixes) === null) return;
+  saisie[positionActive(fixes)] = lettre;
+  avancerCurseur(fixes);
+  rendreGrille();
+}
+
+function avancerCurseur(fixes) {
+  const libres = positionsLibres(fixes);
+  const i = libres.indexOf(positionActive(fixes));
+  curseur = i === -1 || i === libres.length - 1 ? positionActive(fixes) : libres[i + 1];
+}
+
+function deplacerCurseur(delta) {
+  if (etat.statut !== 'en_cours') return;
+  const fixes = lettresFixes();
+  const libres = positionsLibres(fixes);
+  const i = libres.indexOf(positionActive(fixes));
   if (i === -1) return;
-  saisie[i] = lettre;
+  curseur = libres[Math.max(0, Math.min(libres.length - 1, i + delta))];
   rendreGrille();
 }
 
 function effacer() {
   if (etat.statut !== 'en_cours') return;
   const fixes = lettresFixes();
-  for (let i = fixes.length - 1; i >= 0; i--) {
-    if (fixes[i] === null && saisie[i]) {
-      saisie[i] = '';
-      break;
+  const i = positionActive(fixes);
+  if (i === null) return;
+  if (saisie[i]) {
+    saisie[i] = '';
+  } else {
+    const libres = positionsLibres(fixes);
+    const j = libres.indexOf(i);
+    if (j > 0) {
+      curseur = libres[j - 1];
+      saisie[curseur] = '';
     }
   }
   rendreGrille();
@@ -172,6 +210,7 @@ async function soumettre() {
       body: JSON.stringify({ jour: etat.jour, mot: lettres.join('') }),
     });
     saisie = [];
+    curseur = null;
     rendreEtat();
     if (etat.statut !== 'en_cours') {
       chargerClassement();
@@ -210,6 +249,9 @@ document.addEventListener('keydown', (evenement) => {
   if (evenement.key === 'Enter') return soumettre();
   if (evenement.key === 'Backspace') return effacer();
   if (evenement.key === 'Escape') return toutEffacer();
+  if (evenement.key === 'ArrowLeft' || evenement.key === 'ArrowRight') {
+    return deplacerCurseur(evenement.key === 'ArrowRight' ? 1 : -1);
+  }
   if (evenement.key.length === 1) {
     const lettre = normaliserLettre(evenement.key);
     if (lettre) ajouter(lettre);
@@ -232,6 +274,7 @@ async function chargerChoixJour() {
 
 async function changerJour(jour) {
   saisie = [];
+  curseur = null;
   jourAffiche = jour;
   etat = await appeler(`/api/partie?jour=${encodeURIComponent(jour)}`);
   rendreEtat();
