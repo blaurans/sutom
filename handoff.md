@@ -174,7 +174,7 @@ docker exec guacamole-caddy-1 caddy reload --config /etc/caddy/Caddyfile
 
 ## Données et licences
 
-- `data/dictionnaire.txt` : 54 039 formes de 8 à 10 lettres, issues de Lexique 3 (normalisées : minuscules, sans accents, a-z).
+- `data/dictionnaire.txt` : 67 090 formes de 8 à 10 lettres (Lexique 3 + Dicollecte MPL-2.0, normalisées : minuscules, sans accents, a-z). Régénération : voir la section ci-dessous.
 - `data/mots-du-jour.txt` : 400 lemmes rares (fréquence littéraire entre 0,5 et 4 par million), filtrés automatiquement puis retouchés à la main.
 - Licence : CC BY-SA 4.0 (Lexique 3). Voir `data/LICENCE.md`. Le dépôt `package.json` est sous MIT pour le code.
 - ODS (dictionnaire Officiel du Scrabble) : **non intégré**. Sa licence de redistribution est à clarifier avant d'être ajouté.
@@ -195,7 +195,7 @@ Pour régénérer les listes, les scripts Python ont été lancés depuis `/tmp/
 
 ## Historique des décisions
 
-- Dictionnaire : Lexique 3 seul (ODS écarté pour raisons de licence).
+- Dictionnaire : union de Lexique 3 et Dicollecte (MPL-2.0). ODS écarté pour raisons de licence.
 - Authentification : OAuth Google en code flow, validation de l'identité via le jeton renvoyé par Google sur le canal TLS.
 - Mode dur : première lettre imposée, couleurs comme indices. La contrainte de réutilisation des lettres a été retirée à la demande.
 - Déploiement : build direct sur ociub, pas de CI.
