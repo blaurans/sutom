@@ -4,7 +4,7 @@ Document de reprise. Aucun secret n'est écrit ici : les valeurs sensibles sont 
 
 ## En bref
 
-- Jeu SUTOM en français : un mot par jour, 8 à 10 lettres, 9 essais, mode dur.
+- Jeu SUTOM en français : deux mots par jour (minuit–midi, midi–minuit), 8 à 10 lettres, 9 essais, mode dur.
 - Connexion Google OAuth, ouverte à tout compte Google.
 - Classement global, avec score, victoires, série, meilleure série.
 - Rattrapage possible : un joueur peut rejouer n'importe quel jour passé non joué.
@@ -76,7 +76,7 @@ Fichier `sutom.db` (SQLite) :
 
 - `joueurs(sub PRIMARY KEY, nom)` : `sub` = identifiant Google, `nom` = nom affiché Google.
 - `parties(sub, jour, mot, essais, statut, aides, PRIMARY KEY(sub, jour))`
-  - `jour` au format `AAAA-MM-JJ` (fuseau Europe/Paris).
+  - `jour` = clé de période au format `AAAA-MM-JJ-am` ou `AAAA-MM-JJ-pm` (fuseau Europe/Paris ; `-am` = minuit à midi, `-pm` = midi à minuit). Les parties antérieures au 08/11/2026 ont été migrées en `-am`. Le serveur accepte encore une date seule (`AAAA-MM-JJ`), traitée comme `-am`.
   - `mot` : mot cible figé à la création de la partie.
   - `essais` : tableau JSON des propositions.
   - `statut` : `en_cours`, `gagnee` ou `perdue`.
@@ -88,7 +88,8 @@ Fichier `sutom.db` (SQLite) :
 - Mot du jour : 8 à 10 lettres, 9 essais, première lettre donnée.
 - Couleurs : rouge (bien placée), jaune (présente ailleurs), gris (absente). Pas de contrainte de réutilisation.
 - Saisie sans accents. Formes fléchies acceptées (dictionnaire Lexique 3).
-- Jour de référence : `DATE_DEBUT = 2026-10-18` dans `src/jeu.js`. Le mot du jour est `motsDuJour[indexJour % 400]` (cycle de 400 jours).
+- Deux mots par jour depuis le 08/11/2026 (un `am` de minuit à midi, un `pm` de midi à minuit) et rattrapage rétroactif des périodes passées.
+- Jour de référence : `DATE_DEBUT = 2026-10-18` dans `src/jeu.js`. Le mot d'une période est `motsDuJour[indexJour % 400]` : `indexJour` avance de 1 à chaque demi-journée, donc cycle de 200 jours (2 mots distincts par jour).
 - Rattrapage : `GET /api/partie?jour=` et `POST /api/essai` acceptent tout jour entre `DATE_DEBUT` et aujourd'hui. Un jour sans partie est créé à la première consultation.
 
 ### Score

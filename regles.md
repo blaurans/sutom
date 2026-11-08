@@ -6,9 +6,9 @@ Hébergement : ociub (Oracle Cloud, aarch64), dossier `/app/sutom`
 
 ## Règles du jeu
 
-- **Un nouveau mot par jour**, changement à minuit (Europe/Paris).
-- Le mot est tiré dans une **liste curée et ordonnée** (un mot par jour, dans l'ordre).
-- Longueur du mot : **de 8 à 10 lettres** (variable selon le jour).
+- **Deux mots par jour** : un de minuit à midi (mot du matin), un de midi à minuit (mot du soir), heure Europe/Paris.
+- Les mots sont tirés dans une **liste curée et ordonnée** (dans l'ordre, cycles sans répétition).
+- Longueur du mot : **de 8 à 10 lettres** (variable selon la période).
 - **9 essais** maximum.
 - La **première lettre est donnée** et ne change pas.
 - Couleurs après chaque essai :

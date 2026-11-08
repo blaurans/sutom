@@ -10,8 +10,6 @@ let curseur = null;
 
 const $ = (id) => document.getElementById(id);
 
-const LIBELLES_STATUT = { en_cours: 'en cours', gagnee: 'gagné', perdue: 'perdu' };
-
 function normaliserLettre(touche) {
   return touche.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase().replace(/[^a-z]/g, '');
 }
@@ -139,9 +137,9 @@ function rendreEtat() {
   rendreClavier();
 
   if (etat.statut === 'gagnee') {
-    afficherMessage(`Bravo, trouvé en ${etat.essais.length} essai(s) ! Prochain mot demain à minuit.`, 'succes');
+    afficherMessage(`Bravo, trouvé en ${etat.essais.length} essai(s) ! Prochain mot ${etat.jour.endsWith('-pm') ? 'demain à minuit' : 'à midi'}.`, 'succes');
   } else if (etat.statut === 'perdue') {
-    afficherMessage(`Perdu. Le mot était : ${etat.mot.toUpperCase()}. Prochain mot demain à minuit.`, 'echec');
+    afficherMessage(`Perdu. Le mot était : ${etat.mot.toUpperCase()}. Prochain mot ${etat.jour.endsWith('-pm') ? 'demain à minuit' : 'à midi'}.`, 'echec');
   } else {
     afficherMessage('');
   }
@@ -262,14 +260,20 @@ async function chargerChoixJour() {
   const { aujourdhui, jours } = await appeler('/api/jours');
   const choix = $('choix-jour');
   choix.innerHTML = '';
-  for (const { jour } of jours) {
+  for (const { cle } of jours) {
     const option = document.createElement('option');
-    option.value = jour;
-    option.textContent = `${jour.slice(8, 10)}-${jour.slice(5, 7)}`;
+    option.value = cle;
+    option.textContent = libelleCle(cle);
     choix.appendChild(option);
   }
   choix.value = jourAffiche || aujourdhui;
   return aujourdhui;
+}
+
+function libelleCle(cle) {
+  const [, mois, jour] = cle.split('-');
+  const demi = cle.endsWith('-pm') ? 'soir' : 'matin';
+  return `${jour}-${mois} ${demi}`;
 }
 
 async function changerJour(jour) {

@@ -5,10 +5,10 @@ import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { DatabaseSync } from 'node:sqlite';
 import {
-  DATE_DEBUT,
   ESSAIS_MAX,
+  cleDeIndex,
+  clePeriode,
   indexJour,
-  jourParis,
   motDuJour,
   normaliser,
   score,
@@ -61,6 +61,8 @@ db.exec(`
 if (!db.prepare('PRAGMA table_info(parties)').all().some((c) => c.name === 'aides')) {
   db.exec(`ALTER TABLE parties ADD COLUMN aides TEXT NOT NULL DEFAULT '${AIDES_VIDES}'`);
 }
+// Parties d'avant le passage à deux mots par jour : une date seule devient la période du matin.
+db.exec("UPDATE parties SET jour = jour || '-am' WHERE length(jour) = 10");
 
 const securise = config.baseUrl.startsWith('https');
 
@@ -140,21 +142,27 @@ const requeteParties = {
   `),
 };
 
-function jourValide(jour) {
-  return typeof jour === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(jour) && jour >= DATE_DEBUT && jour <= jourParis();
+function normaliserCle(jour) {
+  if (typeof jour !== 'string') return null;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(jour)) return `${jour}-am`;
+  return /^\d{4}-\d{2}-\d{2}-(am|pm)$/.test(jour) ? jour : null;
+}
+
+function jourValide(cle) {
+  if (!cle) return false;
+  const n = indexJour(cle);
+  return Number.isInteger(n) && n >= 0 && n <= indexJour(clePeriode());
 }
 
 function listerJours(sub) {
-  const aujourdhui = jourParis();
+  const courant = clePeriode();
   const statuts = new Map(requeteParties.tous.all(sub).map((l) => [l.jour, l.statut]));
   const jours = [];
-  const [a, m, d] = DATE_DEBUT.split('-').map(Number);
-  for (let t = Date.UTC(a, m - 1, d); ; t += 86400000) {
-    const jour = new Date(t).toISOString().slice(0, 10);
-    if (jour > aujourdhui) break;
-    jours.push({ jour, statut: statuts.get(jour) ?? null });
+  for (let n = indexJour(courant); n >= 0; n--) {
+    const cle = cleDeIndex(n);
+    jours.push({ cle, statut: statuts.get(cle) ?? null });
   }
-  return { aujourdhui, jours: jours.reverse() };
+  return { aujourdhui: courant, jours };
 }
 
 function etatPartie(sub, jour) {
@@ -176,7 +184,8 @@ function etatPartie(sub, jour) {
   };
 }
 
-function utiliserAide(sub, jour, type) {
+function utiliserAide(sub, jourBrut, type) {
+  const jour = normaliserCle(jourBrut);
   if (!jourValide(jour)) return { erreur: 400, message: 'Jour invalide.' };
   if (!COUT_AIDE[type]) return { erreur: 400, message: 'Aide inconnue.' };
   const partie = requeteParties.lire.get(sub, jour);
@@ -205,7 +214,8 @@ function coutAides(aides) {
   return aides.exclues.length * COUT_AIDE.exclure + aides.revelees.length * COUT_AIDE.reveler;
 }
 
-function ajouterEssai(sub, jour, brut) {
+function ajouterEssai(sub, jourBrut, brut) {
+  const jour = normaliserCle(jourBrut);
   if (!jourValide(jour)) return { erreur: 400, message: 'Jour invalide.' };
   const partie = requeteParties.lire.get(sub, jour);
   if (!partie) return { erreur: 404, message: 'Partie introuvable.' };
@@ -245,7 +255,7 @@ function calculerClassement() {
     joueur.parties.push({ jour: indexJour(ligne.jour), gagnee, essais: essais.length, points });
     joueurs.set(ligne.sub, joueur);
   }
-  const aujourd = indexJour(jourParis());
+  const aujourd = indexJour(clePeriode());
   return [...joueurs.values()]
     .map(({ nom, parties }) => {
       const victoires = parties.filter((p) => p.gagnee);
@@ -303,7 +313,7 @@ async function routeApi(req, res, url) {
   }
 
   if (url.pathname === '/api/partie' && req.method === 'GET') {
-    const jour = url.searchParams.get('jour') || jourParis();
+    const jour = normaliserCle(url.searchParams.get('jour') || clePeriode());
     if (!jourValide(jour)) return envoyerJson(res, 400, { erreur: 'Jour invalide.' });
     return envoyerJson(res, 200, etatPartie(session.sub, jour));
   }
