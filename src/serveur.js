@@ -200,8 +200,15 @@ function utiliserAide(sub, jourBrut, type) {
     if (!candidates.length) return { erreur: 409, message: 'Plus aucune lettre à retirer.' };
     aides.exclues.push(candidates[crypto.randomInt(candidates.length)]);
   } else {
-    const positions = [...cible].map((_, i) => i).filter((i) => i > 0 && !aides.revelees.some((r) => r.position === i));
-    if (!positions.length) return { erreur: 409, message: 'Toutes les lettres sont déjà révélées.' };
+    // Ne pas vendre une lettre déjà connue : révélée par une aide, ou rouge dans un essai joué.
+    const connues = new Set(aides.revelees.map((r) => r.position));
+    for (const passe of JSON.parse(partie.essais)) {
+      score(passe, cible).forEach((v, i) => {
+        if (v === 'correct') connues.add(i);
+      });
+    }
+    const positions = [...cible].map((_, i) => i).filter((i) => i > 0 && !connues.has(i));
+    if (!positions.length) return { erreur: 409, message: 'Toutes les lettres sont déjà connues.' };
     const position = positions[crypto.randomInt(positions.length)];
     aides.revelees.push({ position, lettre: cible[position] });
   }

@@ -49,7 +49,7 @@ Hébergement : ociub (Oracle Cloud, aarch64), dossier `/app/sutom`
 ### Aides
 
 - **Enlève une lettre** (−2 pts) : retire du clavier une lettre qui n'est pas dans le mot. Utilisable plusieurs fois tant qu'il reste de telles lettres.
-- **Donne une lettre** (−5 pts) : révèle une lettre à sa bonne place (jamais la première, déjà donnée). Utilisable plusieurs fois.
+- **Donne une lettre** (−5 pts) : révèle une lettre à sa bonne place (jamais la première, jamais une lettre déjà connue dans un essai joué). Utilisable plusieurs fois.
 - Les aides ne sont disponibles que pendant la partie en cours. Elles sont enregistrées et comptées dans le score.
 
 ## Architecture technique
