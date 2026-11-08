@@ -174,7 +174,7 @@ docker exec guacamole-caddy-1 caddy reload --config /etc/caddy/Caddyfile
 
 ## Données et licences
 
-- `data/dictionnaire.txt` : 67 090 formes de 8 à 10 lettres (Lexique 3 + Dicollecte MPL-2.0, normalisées : minuscules, sans accents, a-z). Régénération : voir la section ci-dessous.
+- `data/dictionnaire.txt` : 67 090 formes de 8 à 10 lettres (Lexique 3 + Dicollecte MPL-2.0, normalisées : minuscules, sans accents, a-z). Source Dicollecte : paquet npm `dictionary-fr` (fichiers `index.dic` et `index.aff`) passés dans `unmunch`, puis filtrés 8 à 10 lettres a-z sans majuscule initiale, fusionnés avec l'ancienne liste.
 - `data/mots-du-jour.txt` : 400 lemmes rares (fréquence littéraire entre 0,5 et 4 par million), filtrés automatiquement puis retouchés à la main.
 - Licence : CC BY-SA 4.0 (Lexique 3). Voir `data/LICENCE.md`. Le dépôt `package.json` est sous MIT pour le code.
 - ODS (dictionnaire Officiel du Scrabble) : **non intégré**. Sa licence de redistribution est à clarifier avant d'être ajouté.
