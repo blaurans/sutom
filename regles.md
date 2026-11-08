@@ -34,7 +34,7 @@ Hébergement : ociub (Oracle Cloud, aarch64), dossier `/app/sutom`
 - Union de **Lexique 3** (mots courants, fréquences) et **ODS** (exhaustivité).
 - Filtrage : lettres A-Z uniquement (sans tiret ni apostrophe), longueur 8 à 10, sans accents, sans majuscules.
 - Le dictionnaire de **validation** (mots acceptés en proposition) est large.
-- La **liste des mots du jour** est volontairement rare : lemmes de fréquence littéraire entre 0,5 et 4 occurrences par million (Lexique 3), noms masculins singuliers, verbes à l'infinitif et adjectifs masculins singuliers, sans noms propres ni gentilés. Elle doit être relue manuellement.
+- La **liste des mots** vise des mots **connus mais pas faciles** : lemmes de fréquence entre 2,5 et 60 occurrences par million (Lexique 3), noms singuliers, verbes à l'infinitif et adjectifs masc singuliers, sans noms propres ni gentilés ni participes. La difficulté vient de la longueur (8 à 10 lettres) et du tirage, pas d'une rareté obscure. Cycle de ~655 jours (2 mots / jour).
 - Points à valider : licences de redistribution (Lexique 3 est CC BY-SA 4.0, ODS à vérifier).
 
 ## Comptes et classement
