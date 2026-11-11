@@ -43,16 +43,16 @@ function lettresFixes() {
 }
 
 function lettreA(i, fixes) {
-  return fixes[i] ?? saisie[i] ?? '';
+  return saisie[i] || fixes[i] || '';
 }
 
-function positionsLibres(fixes) {
-  return fixes.map((l, i) => (l === null ? i : null)).filter((i) => i !== null);
+function positionsLibres() {
+  return Array.from({ length: etat.longueur - 1 }, (_, k) => k + 1);
 }
 
-function positionActive(fixes) {
-  const libres = positionsLibres(fixes);
-  if (curseur !== null && libres.includes(curseur)) return curseur;
+function positionActive() {
+  const libres = positionsLibres();
+  if (curseur !== null && curseur > 0 && curseur < etat.longueur) return curseur;
   return libres[0] ?? null;
 }
 
@@ -76,17 +76,19 @@ function rendreGrille() {
       if (essai) {
         cellule.textContent = essai.mot[c].toUpperCase();
         cellule.classList.add(essai.resultat[c]);
-      } else if (fixes[c]) {
-        cellule.textContent = fixes[c].toUpperCase();
-        cellule.classList.add('indice');
       } else if (courante) {
-        cellule.textContent = (saisie[c] || '').toUpperCase();
-        cellule.classList.add('saisie');
-        if (positionActive(fixes) === c) cellule.classList.add('actif');
-        cellule.addEventListener('click', () => {
-          curseur = c;
-          rendreGrille();
-        });
+        if (c === 0) {
+          cellule.textContent = fixes[0].toUpperCase();
+          cellule.classList.add('indice');
+        } else {
+          cellule.textContent = lettreA(c, fixes).toUpperCase();
+          cellule.classList.add('saisie');
+          if (positionActive() === c) cellule.classList.add('actif');
+          cellule.addEventListener('click', () => {
+            curseur = c;
+            rendreGrille();
+          });
+        }
       }
       ligne.appendChild(cellule);
     }
@@ -147,43 +149,35 @@ function rendreEtat() {
 
 function ajouter(lettre) {
   if (etat.statut !== 'en_cours' || etat.aides.exclues.includes(lettre)) return;
-  const fixes = lettresFixes();
-  if (positionActive(fixes) === null) return;
-  saisie[positionActive(fixes)] = lettre;
-  avancerCurseur(fixes);
+  if (positionActive() === null) return;
+  saisie[positionActive()] = lettre;
+  avancerCurseur();
   rendreGrille();
 }
 
-function avancerCurseur(fixes) {
-  const libres = positionsLibres(fixes);
-  const i = libres.indexOf(positionActive(fixes));
-  curseur = i === -1 || i === libres.length - 1 ? positionActive(fixes) : libres[i + 1];
+function avancerCurseur() {
+  const libres = positionsLibres();
+  const i = libres.indexOf(positionActive());
+  curseur = i === -1 || i === libres.length - 1 ? positionActive() : libres[i + 1];
 }
 
 function deplacerCurseur(delta) {
   if (etat.statut !== 'en_cours') return;
-  const fixes = lettresFixes();
-  const libres = positionsLibres(fixes);
-  const i = libres.indexOf(positionActive(fixes));
-  if (i === -1) return;
-  curseur = libres[Math.max(0, Math.min(libres.length - 1, i + delta))];
+  const i = positionActive();
+  if (i === null) return;
+  curseur = Math.max(1, Math.min(etat.longueur - 1, i + delta));
   rendreGrille();
 }
 
 function effacer() {
   if (etat.statut !== 'en_cours') return;
-  const fixes = lettresFixes();
-  const i = positionActive(fixes);
+  const i = positionActive();
   if (i === null) return;
   if (saisie[i]) {
     saisie[i] = '';
-  } else {
-    const libres = positionsLibres(fixes);
-    const j = libres.indexOf(i);
-    if (j > 0) {
-      curseur = libres[j - 1];
-      saisie[curseur] = '';
-    }
+  } else if (i > 1) {
+    curseur = i - 1;
+    saisie[curseur] = '';
   }
   rendreGrille();
 }

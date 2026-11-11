@@ -26,8 +26,11 @@ Hébergement : ociub (Oracle Cloud, aarch64), dossier `/app/sutom`
 
 ### Saisie
 
-- Retour arrière (⌫) : efface la dernière lettre.
-- Échap ou « Tout effacer » : efface toute la saisie de la ligne en cours.
+- Une lettre déjà trouvée rouge s'affiche pré-remplie à sa place, mais on peut la remplacer pour tester d'autres mots.
+- La première lettre reste imposée et non modifiable.
+- Clic sur une case ou flèches gauche/droite : choisit la case où écrire.
+- Retour arrière (⌫) : efface la lettre au curseur, sinon recule.
+- Échap ou « Tout effacer » : vide la saisie (les lettres connues se réaffichent pré-remplies).
 
 ## Dictionnaire
 
