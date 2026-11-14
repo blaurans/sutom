@@ -80,6 +80,7 @@ Il contient : ce qu'est le jeu, toutes les décisions prises et pourquoi, l'arch
 | Boutons **Tout effacer** (et touche Échap) | Demande : pouvoir vider ce qu'on a tapé. |
 | Mode d'emploi dans une boîte de dialogue (bouton « ? ») | Demandé. |
 | Ligne d'info « Mot du … / essais / mode dur » **supprimée** | Demandée en trop, jugée inutile. |
+| **Nouveautés** (notes de version) sous le mode d'emploi, groupées par date | Demande du 14/11/2026 : l'historique des changements visible dans le « ? ». Dialogue limité à 85 % de la hauteur et défilant. |
 | Messages de fin adaptés : « prochain mot à midi » ou « demain à minuit » | Cohérent avec les 2 périodes. |
 | Aides avec **confirmation** avant dépense | Éviter les clics involontaires. |
 | Aide « donne une lettre » ne vend **jamais** une position déjà connue (rouge dans un essai ou déjà révélée) | Demandé : on payait pour une information déjà gratuite. |
@@ -298,3 +299,4 @@ Ces scripts vivaient dans `/tmp/opencode/fr` et **ne sont pas dans le dépôt** 
 13. Aide « donne une lettre » ne vend plus de position déjà connue.
 14. Calendrier avec choix matin / après-midi.
 15. En-tête : le bouton du jour n'hérite plus du style rond du « ? » — le libellé « Mot du 14-11 après-midi » redevient lisible (il était écrasé à 2 rem et masqué).
+16. Notes de version « Nouveautés » ajoutées sous le mode d'emploi (« ? »), groupées par date ; dialogue défilant à 85 % de la hauteur.

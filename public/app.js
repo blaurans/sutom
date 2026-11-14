@@ -412,7 +412,12 @@ $('tout-effacer').addEventListener('click', toutEffacer);
 $('valider').addEventListener('click', soumettre);
 $('aide-exclure').addEventListener('click', () => utiliserAide('exclure'));
 $('aide-reveler').addEventListener('click', () => utiliserAide('reveler'));
-$('mode-emploi-ouvrir').addEventListener('click', () => $('mode-emploi').showModal());
+$('mode-emploi-ouvrir').addEventListener('click', () => {
+  const modeEmploi = $('mode-emploi');
+  modeEmploi.showModal();
+  // Le navigateur donne le focus au bouton « Fermer » (en bas) : on revient en haut.
+  modeEmploi.scrollTop = 0;
+});
 $('mode-emploi-fermer').addEventListener('click', () => $('mode-emploi').close());
 
 demarrer().catch((erreur) => afficherMessage(erreur.message, 'erreur'));
