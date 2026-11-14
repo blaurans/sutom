@@ -438,7 +438,9 @@ button.secondaire {
   gap: 0.75rem;
 }
 
-.titre button {
+/* Seul le bouton « ? » du mode d'emploi est rond : le bouton du jour doit
+   garder la largeur de son libellé (« Mot du 14-11 après-midi »). */
+#mode-emploi-ouvrir {
   width: 2rem;
   height: 2rem;
   padding: 0;

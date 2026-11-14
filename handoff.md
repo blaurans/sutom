@@ -297,3 +297,4 @@ Ces scripts vivaient dans `/tmp/opencode/fr` et **ne sont pas dans le dépôt** 
 12. Lettres rouges reportées en rouge sur la ligne suivante, remplaçables.
 13. Aide « donne une lettre » ne vend plus de position déjà connue.
 14. Calendrier avec choix matin / après-midi.
+15. En-tête : le bouton du jour n'hérite plus du style rond du « ? » — le libellé « Mot du 14-11 après-midi » redevient lisible (il était écrasé à 2 rem et masqué).
