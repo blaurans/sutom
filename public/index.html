@@ -11,8 +11,9 @@
       <div class="titre">
         <h1>SUTOM</h1>
         <div id="zone-jour" hidden>
-          <label for="choix-jour">Mot du</label>
-          <select id="choix-jour"></select>
+          <button type="button" id="ouvrir-calendrier" class="secondaire" aria-haspopup="dialog">
+            <span id="libelle-jour"></span>
+          </button>
         </div>
         <button type="button" id="mode-emploi-ouvrir" class="secondaire" aria-label="Mode d'emploi">?</button>
       </div>
@@ -64,6 +65,31 @@
         </div>
       </section>
     </main>
+
+    <dialog id="calendrier">
+      <div class="cal-entete">
+        <button type="button" id="cal-prec" class="secondaire" aria-label="Mois précédent">‹</button>
+        <strong id="cal-mois"></strong>
+        <button type="button" id="cal-suiv" class="secondaire" aria-label="Mois suivant">›</button>
+      </div>
+      <div class="cal-semaine" aria-hidden="true">
+        <span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span>
+      </div>
+      <div id="cal-grille" class="cal-grille"></div>
+      <div class="cal-choix">
+        <button type="button" id="cal-matin" class="bouton">Matin</button>
+        <button type="button" id="cal-soir" class="bouton">Après-midi</button>
+      </div>
+      <p class="cal-legende">
+        <span class="pastille gagnee"></span> gagné
+        <span class="pastille perdue"></span> perdu
+        <span class="pastille en_cours"></span> en cours
+        <span class="pastille"></span> à jouer
+      </p>
+      <form method="dialog">
+        <button class="secondaire" type="submit">Fermer</button>
+      </form>
+    </dialog>
 
     <dialog id="mode-emploi">
       <h2>Mode d'emploi</h2>

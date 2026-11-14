@@ -212,7 +212,7 @@ async function soumettre() {
     rendreEtat();
     if (etat.statut !== 'en_cours') {
       chargerClassement();
-      chargerChoixJour();
+      chargerJours().then(afficherLibelleJour);
     }
   } catch (erreur) {
     afficherMessage(erreur.message, 'erreur');
@@ -256,24 +256,99 @@ document.addEventListener('keydown', (evenement) => {
   }
 });
 
-async function chargerChoixJour() {
+let joursParCle = new Map();
+let cleCourante = null;
+let dateSelectionnee = null;
+let moisCalendrier = null;
+
+async function chargerJours() {
   const { aujourdhui, jours } = await appeler('/api/jours');
-  const choix = $('choix-jour');
-  choix.innerHTML = '';
-  for (const { cle } of jours) {
-    const option = document.createElement('option');
-    option.value = cle;
-    option.textContent = libelleCle(cle);
-    choix.appendChild(option);
-  }
-  choix.value = jourAffiche || aujourdhui;
+  joursParCle = new Map(jours.map(({ cle, statut }) => [cle, statut]));
+  cleCourante = aujourdhui;
   return aujourdhui;
 }
 
 function libelleCle(cle) {
   const [, mois, jour] = cle.split('-');
-  const demi = cle.endsWith('-pm') ? 'soir' : 'matin';
-  return `${jour}-${mois} ${demi}`;
+  return `${jour}-${mois} ${cle.endsWith('-pm') ? 'après-midi' : 'matin'}`;
+}
+
+function afficherLibelleJour() {
+  $('libelle-jour').textContent = `Mot du ${libelleCle(jourAffiche || cleCourante)}`;
+}
+
+function rendreCalendrier() {
+  const [annee, mois] = moisCalendrier;
+  const premier = new Date(Date.UTC(annee, mois - 1, 1));
+  const decalage = (premier.getUTCDay() + 6) % 7;
+  const nbJours = new Date(Date.UTC(annee, mois, 0)).getUTCDate();
+  $('cal-mois').textContent = premier.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+
+  const grille = $('cal-grille');
+  grille.innerHTML = '';
+  for (let i = 0; i < decalage; i++) grille.appendChild(document.createElement('span'));
+
+  for (let j = 1; j <= nbJours; j++) {
+    const date = `${annee}-${String(mois).padStart(2, '0')}-${String(j).padStart(2, '0')}`;
+    const matin = `${date}-am`;
+    const soir = `${date}-pm`;
+    const futur = matin > cleCourante;
+    const bouton = document.createElement('button');
+    bouton.type = 'button';
+    bouton.className = 'cal-jour';
+    bouton.disabled = futur;
+    if (date === dateSelectionnee) bouton.classList.add('choisi');
+    if (matin === cleCourante || soir === cleCourante) bouton.classList.add('aujourdhui');
+
+    const numero = document.createElement('span');
+    numero.textContent = j;
+    bouton.appendChild(numero);
+
+    const barres = document.createElement('span');
+    barres.className = 'cal-barres';
+    for (const cle of [matin, soir]) {
+      const barre = document.createElement('span');
+      const statut = joursParCle.get(cle);
+      barre.className = `barre${statut ? ` ${statut}` : ''}`;
+      barres.appendChild(barre);
+    }
+    bouton.appendChild(barres);
+    bouton.addEventListener('click', () => {
+      dateSelectionnee = date;
+      const matinJouable = matin <= cleCourante;
+      const soirJouable = soir <= cleCourante;
+      $('cal-matin').disabled = !matinJouable;
+      $('cal-soir').disabled = !soirJouable;
+      rendreCalendrier();
+    });
+    grille.appendChild(bouton);
+  }
+
+  $('cal-matin').disabled = !dateSelectionnee || `${dateSelectionnee}-am` > cleCourante;
+  $('cal-soir').disabled = !dateSelectionnee || `${dateSelectionnee}-pm` > cleCourante;
+}
+
+function ouvrirCalendrier() {
+  const cle = jourAffiche || cleCourante;
+  const [annee, mois] = cle.slice(0, 7).split('-').map(Number);
+  moisCalendrier = [annee, mois];
+  dateSelectionnee = cle.slice(0, 10);
+  rendreCalendrier();
+  $('calendrier').showModal();
+}
+
+function decalerMois(delta) {
+  const [annee, mois] = moisCalendrier;
+  const suivant = new Date(Date.UTC(annee, mois - 1 + delta, 1));
+  moisCalendrier = [suivant.getUTCFullYear(), suivant.getUTCMonth() + 1];
+  rendreCalendrier();
+}
+
+async function choisirPeriode(demi) {
+  const cle = `${dateSelectionnee}-${demi}`;
+  if (cle > cleCourante) return;
+  $('calendrier').close();
+  await changerJour(cle);
 }
 
 async function changerJour(jour) {
@@ -281,6 +356,7 @@ async function changerJour(jour) {
   curseur = null;
   jourAffiche = jour;
   etat = await appeler(`/api/partie?jour=${encodeURIComponent(jour)}`);
+  afficherLibelleJour();
   rendreEtat();
 }
 
@@ -322,12 +398,16 @@ async function demarrer() {
   $('compte').hidden = false;
   $('zone-jour').hidden = false;
   $('jeu').hidden = false;
-  const aujourdhui = await chargerChoixJour();
+  const aujourdhui = await chargerJours();
   await changerJour(aujourdhui);
   chargerClassement();
 }
 
-$('choix-jour').addEventListener('change', (evenement) => changerJour(evenement.target.value));
+$('ouvrir-calendrier').addEventListener('click', ouvrirCalendrier);
+$('cal-prec').addEventListener('click', () => decalerMois(-1));
+$('cal-suiv').addEventListener('click', () => decalerMois(1));
+$('cal-matin').addEventListener('click', () => choisirPeriode('am'));
+$('cal-soir').addEventListener('click', () => choisirPeriode('pm'));
 $('tout-effacer').addEventListener('click', toutEffacer);
 $('valider').addEventListener('click', soumettre);
 $('aide-exclure').addEventListener('click', () => utiliserAide('exclure'));

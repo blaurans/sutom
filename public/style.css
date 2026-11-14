@@ -66,6 +66,133 @@ main {
   font-size: 0.9rem;
 }
 
+#zone-jour button {
+  white-space: nowrap;
+}
+
+.cal-entete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+
+.cal-entete button {
+  width: 2.2rem;
+  padding: 0.2rem;
+}
+
+.cal-semaine,
+.cal-grille {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.2rem;
+}
+
+.cal-semaine {
+  color: var(--discret);
+  font-size: 0.8rem;
+  text-align: center;
+  margin-bottom: 0.2rem;
+}
+
+.cal-jour {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.3rem 0.1rem;
+  background: var(--fond);
+  color: var(--texte);
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.cal-jour:disabled {
+  color: #555b66;
+  cursor: default;
+}
+
+.cal-jour.aujourdhui {
+  border-color: var(--accent);
+}
+
+.cal-jour.choisi {
+  border-color: var(--texte);
+}
+
+.cal-barres {
+  display: flex;
+  gap: 2px;
+}
+
+.cal-barres .barre {
+  width: 0.7rem;
+  height: 0.25rem;
+  border-radius: 2px;
+  background: var(--absent);
+}
+
+.cal-barres .barre.gagnee {
+  background: #3fae6a;
+}
+
+.cal-barres .barre.perdue {
+  background: var(--correct);
+}
+
+.cal-barres .barre.en_cours {
+  background: var(--present);
+}
+
+.cal-choix {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0.8rem 0 0.4rem;
+}
+
+.cal-choix button {
+  flex: 1;
+}
+
+.cal-choix button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.cal-legende {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--discret);
+  font-size: 0.75rem;
+  margin: 0.4rem 0 0.8rem;
+}
+
+.pastille {
+  display: inline-block;
+  width: 0.7rem;
+  height: 0.25rem;
+  border-radius: 2px;
+  background: var(--absent);
+}
+
+.pastille.gagnee {
+  background: #3fae6a;
+}
+
+.pastille.perdue {
+  background: var(--correct);
+}
+
+.pastille.en_cours {
+  background: var(--present);
+}
+
 body {
   touch-action: manipulation;
 }
