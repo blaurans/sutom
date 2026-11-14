@@ -39,6 +39,12 @@ function lettresFixes() {
   const fixes = Array(etat.longueur).fill(null);
   fixes[0] = etat.premiereLettre;
   for (const { position, lettre } of etat.aides.revelees) fixes[position] = lettre;
+  // Lettres déjà confirmées rouges dans un essai : reportées sur la ligne en cours.
+  for (const essai of etat.essais) {
+    essai.resultat.forEach((resultat, i) => {
+      if (resultat === 'correct') fixes[i] = essai.mot[i];
+    });
+  }
   return fixes;
 }
 
@@ -82,7 +88,7 @@ function rendreGrille() {
           cellule.classList.add('indice');
         } else {
           cellule.textContent = lettreA(c, fixes).toUpperCase();
-          cellule.classList.add('saisie');
+          cellule.classList.add(saisie[c] ? 'saisie' : fixes[c] ? 'connue' : 'saisie');
           if (positionActive() === c) cellule.classList.add('actif');
           cellule.addEventListener('click', () => {
             curseur = c;

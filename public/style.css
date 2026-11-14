@@ -141,6 +141,13 @@ select {
   border-width: 3px;
 }
 
+/* Lettre déjà trouvée rouge : affichée en rouge mais remplaçable. */
+.case.connue {
+  background: var(--correct);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+}
+
 .case.saisie {
   cursor: pointer;
 }
